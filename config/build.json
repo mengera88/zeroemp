@@ -1,0 +1,6 @@
+{
+    "web": {
+        "clientBase": "./web",
+        "distBase": "./public"
+    }
+}

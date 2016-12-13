@@ -1,0 +1,46 @@
+{
+  "name": "zeroemp",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.15.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.2.0",
+    "ejs": "~2.5.2",
+    "es6-promise": "^4.0.5",
+    "express": "~4.14.0",
+    "fetch-jsonp": "^1.0.3",
+    "morgan": "~1.7.0",
+    "serve-favicon": "~2.3.0",
+    "whatwg-fetch": "^2.0.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.8",
+    "babel-plugin-transform-es2015-classes": "^6.9.0",
+    "babel-plugin-transform-proto-to-assign": "^6.9.0",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "fetch": "^1.1.0",
+    "got": "^6.6.3",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-less": "^3.3.0",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-plumber": "^1.1.0",
+    "gulp-util": "^3.0.7",
+    "json-loader": "^0.5.4",
+    "minicap": "0.0.1",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "request": "^2.79.0",
+    "vinyl-named": "^1.1.0",
+    "webpack": "^1.13.3",
+    "webpack-dev-middleware": "^1.8.4",
+    "webpack-hot-middleware": "^2.13.2",
+    "ws": "^1.1.1"
+  }
+}

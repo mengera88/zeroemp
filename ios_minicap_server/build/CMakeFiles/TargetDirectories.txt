@@ -1,0 +1,3 @@
+/Users/gujing/et/ios-minicap/build/CMakeFiles/rebuild_cache.dir
+/Users/gujing/et/ios-minicap/build/CMakeFiles/edit_cache.dir
+/Users/gujing/et/ios-minicap/build/CMakeFiles/ios_minicap.dir
