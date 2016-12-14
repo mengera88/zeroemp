@@ -22060,9 +22060,9 @@
 
 	var _control2 = _interopRequireDefault(_control);
 
-	var _dom = __webpack_require__(187);
+	var _dom = __webpack_require__(186);
 
-	var _config = __webpack_require__(186);
+	var _config = __webpack_require__(187);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -22076,6 +22076,8 @@
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * @author  jessica(hzgujing@corp.netease.com)
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
+	var DOUBLECLICKTIME = 500;
+	var LONGCLICKTIME = 500;
 	var deviceURL = _config2.default.url; //定义设备接口地址
 
 	var ReadFrameRender = function (_React$Component) {
@@ -22086,14 +22088,32 @@
 
 	        var _this = _possibleConstructorReturn(this, (ReadFrameRender.__proto__ || Object.getPrototypeOf(ReadFrameRender)).call(this, props));
 
+	        _this.startTime = null; // 鼠标按下时的时间
+	        _this.endTime = null; // 鼠标松开时的时间
+	        _this.clickTime = null; // 存储一次单击的时间
+	        _this.startPoint = null; // 存储鼠标按下时的坐标
+	        _this.endPoint = null; // 存储鼠标送开始的坐标
+	        _this.clickPoint = null; // 存储鼠标单击时的坐标
+	        _this.isMoveTriggered = false; // 判断是否出发了mousemove函数
+	        _this.clickType = null; // 存储鼠标行为类别
+	        _this.moveTime = null; // 存储开始move的时间
+	        _this.orientation = null; // 存储旋转方向信息
+
 	        _this.deviceControl = new _control2.default(deviceURL);
 
 	        _this.onMouseDown = _this.onMouseDown.bind(_this);
 	        _this.onMouseMove = _this.onMouseMove.bind(_this);
 	        _this.onMouseUp = _this.onMouseUp.bind(_this);
 	        _this.stopMousing = _this.stopMousing.bind(_this);
-
+	        _this.handleClick = _this.handleClick.bind(_this);
+	        _this.handleDoubleClick = _this.handleDoubleClick.bind(_this);
+	        _this.handleTouchAndHold = _this.handleTouchAndHold.bind(_this);
+	        _this.handleClickType = _this.handleClickType.bind(_this);
+	        _this.handleDrag = _this.handleDrag.bind(_this);
+	        _this.setOrientation = _this.setOrientation.bind(_this);
 	        _this.returnHome = _this.returnHome.bind(_this);
+	        _this.handleKeys = _this.handleKeys.bind(_this);
+
 	        return _this;
 	    }
 
@@ -22142,10 +22162,71 @@
 	        value: function returnHome() {
 	            this.deviceControl.returnHome();
 	        }
+
+	        //处理keys
+
+	    }, {
+	        key: 'handleKeys',
+	        value: function handleKeys(e) {
+	            var key = [];
+	            if (e.keyCode == 8) {
+	                //删除键
+	                key.push('\b');
+	            } else if (e.keyCode == 13) {
+	                key.push('\r');
+	            } else if (e.shiftKey) {
+	                key.push('');
+	            } else {
+	                key.push(e.key);
+	            }
+	            this.deviceControl.handleKeys(key);
+	        }
+
+	        //获取设备旋转状态
+
+	    }, {
+	        key: 'getOrientatioin',
+	        value: function getOrientatioin() {
+	            var _this2 = this;
+
+	            console.log('ffff');
+	            fetch(deviceURL + '/deviceControl/getOrientation', {
+	                method: 'get'
+	            }).then(function (data) {
+	                return data.text();
+	            }).then(function (text) {
+	                _this2.orientation = JSON.parse(text).value;
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
+
+	        //设置设备旋转
+
+	    }, {
+	        key: 'setOrientation',
+	        value: function setOrientation() {
+	            var orientation = void 0;
+	            console.log(this.orientation);
+	            if (this.orientation == 'PORTRAIT') {
+	                orientation = 'LANDSCAPE';
+	                this.orientation = 'LANDSCAPE';
+	            } else if (this.orientation == 'LANDSCAPE') {
+	                orientation = 'PORTRAIT';
+	                this.orientation = 'PORTRAIT';
+	            }
+
+	            this.deviceControl.setOrientation(orientation);
+	        }
 	    }, {
 	        key: 'stopMousing',
 	        value: function stopMousing() {
 	            var el = this.refs.screen;
+
+	            this.clickType = null;
+	            this.isMoveTriggered = false;
+
 	            el.removeEventListener('mousemove', this.onMouseMove);
 	            document.removeEventListener('mouseup', this.onMouseUp);
 	            document.removeEventListener('mouseleave', this.onMouseUp);
@@ -22156,11 +22237,14 @@
 	    }, {
 	        key: 'onMouseDown',
 	        value: function onMouseDown(e) {
+	            e.preventDefault();
 	            var el = this.refs.screen;
+	            this.refs.keyinput.focus();
 	            var rect = el.getBoundingClientRect();
 	            var x = e.pageX - rect.left;
 	            var y = e.pageY - rect.top - (0, _dom.getScrollTop)();
-	            this.deviceControl.handleMouseDown(x, y);
+	            this.startTime = Date.now();
+	            this.startPoint = [x, y];
 	            el.addEventListener('mousemove', this.onMouseMove);
 	            document.addEventListener('mouseup', this.onMouseUp);
 	            document.addEventListener('mouseleave', this.onMouseUp);
@@ -22168,19 +22252,112 @@
 	    }, {
 	        key: 'onMouseMove',
 	        value: function onMouseMove(e) {
-	            console.log('mousemove ' + e);
+	            e.preventDefault();
+	            this.isMoveTriggered = true;
+	            this.moveTime = Date.now();
 	        }
 	    }, {
 	        key: 'onMouseUp',
 	        value: function onMouseUp(e) {
-	            console.log('mouseup ' + e);
+	            e.preventDefault();
+	            var el = this.refs.screen;
+	            var rect = el.getBoundingClientRect();
+	            this.endTime = Date.now();
+	            var x = e.pageX - rect.left;
+	            var y = e.pageY - rect.top - (0, _dom.getScrollTop)();
+	            this.endPoint = [x, y];
+	            var timeDis = this.endTime - this.startTime;
+	            if (this.isMoveTriggered) {
+	                //为拖拽
+	                this.clickType = 'drag';
+	            } else if (timeDis < LONGCLICKTIME && !this.isMoveTriggered) {
+	                //则为单击
+	                this.clickType = 'click';
+	            } else if (timeDis > LONGCLICKTIME && !this.isMoveTriggered && this.isInRange(this.startPoint, this.endPoint, 5)) {
+	                //则为长按
+	                this.clickType = 'touchandhold';
+	            }
 
+	            if (this.clickType == 'click') {
+	                var currentTime = Date.now();
+	                if (this.clickTime && currentTime - this.clickTime <= DOUBLECLICKTIME && this.isInRange(this.endPoint, this.clickPoint, 5)) {
+	                    console.log('doubleclick');
+	                    this.clickTime = null;
+	                } else {
+	                    this.clickTime = currentTime;
+	                    this.clickPoint = this.endPoint;
+	                }
+	            }
+
+	            this.handleClickType();
+	            //取消事件绑定
 	            this.stopMousing();
+	        }
+
+	        //计算距离
+
+	    }, {
+	        key: 'isInRange',
+	        value: function isInRange(startPoint, endPoint, threshold) {
+	            var deltaX = parseFloat(endPoint[0]) - parseFloat(startPoint[0]);
+	            var deltaY = parseFloat(endPoint[1]) - parseFloat(startPoint[1]);
+
+	            return Math.pow(deltaX, 2) + Math.pow(deltaY, 2) <= Math.pow(threshold, 2);
+	        }
+
+	        //判断鼠标行为类别
+
+	    }, {
+	        key: 'handleClickType',
+	        value: function handleClickType() {
+	            switch (this.clickType) {
+	                case 'click':
+	                    this.handleClick(this.startPoint[0], this.startPoint[1]);break;
+	                case 'touchandhold':
+	                    this.handleTouchAndHold(this.startPoint[0], this.startPoint[1], this.endTime - this.startTime);break;
+	                case 'doubleclick':
+	                    this.handleDoubleClick(this.endPoint[0], this.endPoint[1]);break;
+	                case 'drag':
+	                    this.handleDrag(this.startPoint[0], this.startPoint[1], this.endPoint[0], this.endPoint[1], this.moveTime - this.startTime);break;
+	            }
+	        }
+
+	        //处理单击事件
+
+	    }, {
+	        key: 'handleClick',
+	        value: function handleClick(x, y) {
+	            this.deviceControl.handleClick(x, y);
+	        }
+
+	        //长按
+
+	    }, {
+	        key: 'handleTouchAndHold',
+	        value: function handleTouchAndHold(x, y, duration) {
+	            this.deviceControl.handleTouchAndHold(x, y, duration);
+	        }
+
+	        //双击
+
+	    }, {
+	        key: 'handleDoubleClick',
+	        value: function handleDoubleClick(x, y) {
+	            this.deviceControl.handleDoubleClick(x, y);
+	        }
+
+	        //拖拽
+
+	    }, {
+	        key: 'handleDrag',
+	        value: function handleDrag(fromX, fromY, toX, toY, duration) {
+	            this.deviceControl.handleDrag(fromX, fromY, toX, toY, duration);
 	        }
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
 	            this.openWebsocket();
+	            this.getOrientatioin();
 	        }
 	    }, {
 	        key: 'componentWillMount',
@@ -22199,15 +22376,21 @@
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'g-center' },
-	                _react2.default.createElement('canvas', { ref: 'screen', onMouseDown: this.onMouseDown }),
+	                { className: 'u-h700 f-tac' },
+	                _react2.default.createElement('input', { className: 'm-input-hide', type: 'text', name: 'ddd', ref: 'keyinput', onKeyDown: this.handleKeys }),
+	                _react2.default.createElement('canvas', { className: 'f-ib', ref: 'screen', onMouseDown: this.onMouseDown }),
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'f-tac' },
 	                    _react2.default.createElement(
 	                        'button',
-	                        { className: 'u-btn-home', type: 'button', onClick: this.returnHome },
+	                        { className: 'u-btn-home u-mgr20', type: 'button', onClick: this.returnHome },
 	                        'Home'
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { className: 'u-btn-home', type: 'button', onClick: this.setOrientation },
+	                        '\u65CB\u8F6C'
 	                    )
 	                )
 	            );
@@ -22535,20 +22718,6 @@
 	 * @author  jessica(hzgujing@corp.netease.com)
 	 */
 
-	function checkStatus(response) {
-	    if (response.status >= 200 && response.status < 300) {
-	        return response;
-	    } else {
-	        var error = new Error(response.statusText);
-	        error.response = response;
-	        throw error;
-	    }
-	}
-
-	function parseJSON(response) {
-	    return response.json();
-	}
-
 	var DeviceControl = function () {
 	    function DeviceControl(url) {
 	        _classCallCheck(this, DeviceControl);
@@ -22562,43 +22731,172 @@
 	    _createClass(DeviceControl, [{
 	        key: 'returnHome',
 	        value: function returnHome() {
-	            console.log(this.deviceUrl);
 	            fetch(this.deviceUrl + '/homescreen', {
-	                method: 'post',
-	                mode: 'no-cors'
-	            }).then(checkStatus).then(parseJSON).then(function (data) {
-	                console.log("request success " + data);
+	                method: 'post'
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
 	            }).catch(function (err) {
-	                console.log("request failed " + err);
+	                console.log('request failed');
+	                console.log(err);
 	            });
 	        }
 
 	        //单击事件
 
 	    }, {
-	        key: 'handleMouseDown',
-	        value: function handleMouseDown(x, y) {
-	            fetch(this.deviceUrl + '/DeviceControl/click', {
+	        key: 'handleClick',
+	        value: function handleClick(x, y) {
+	            fetch(this.deviceUrl + '/deviceControl/click', {
 	                method: 'post',
-	                mode: 'no-cors',
 	                body: JSON.stringify({
 	                    x: x,
 	                    y: y
 	                })
-	            }).then(checkStatus).then(parseJSON).then(function (data) {
-	                console.log("request success " + data);
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
 	            }).catch(function (err) {
-	                console.log("request failed " + err);
+	                console.log('request failed');
+	                console.log(err);
 	            });
 	        }
 
 	        //双击事件
 
+	    }, {
+	        key: 'handleDoubleClick',
+	        value: function handleDoubleClick(x, y) {
+	            fetch(this.deviceUrl + '/deviceControl/doubleClick', {
+	                method: 'post',
+	                body: JSON.stringify({
+	                    x: x,
+	                    y: y
+	                })
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
 
 	        //长按
 
+	    }, {
+	        key: 'handleTouchAndHold',
+	        value: function handleTouchAndHold(x, y, duration) {
+	            duration = parseFloat(duration / 1000);
+	            fetch(this.deviceUrl + '/DeviceControl/touchAndHold', {
+	                method: 'post',
+	                body: JSON.stringify({
+	                    x: x,
+	                    y: y,
+	                    duration: duration
+	                })
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
+
 	        //拖拽
 
+	    }, {
+	        key: 'handleDrag',
+	        value: function handleDrag(fromX, fromY, toX, toY, duration) {
+	            duration = parseFloat(duration / 1000);
+	            console.log(duration);
+	            fetch(this.deviceUrl + '/deviceControl/dragFromToForDuration', {
+	                method: 'post',
+	                body: JSON.stringify({
+	                    fromX: fromX,
+	                    fromY: fromY,
+	                    toX: toX,
+	                    toY: toX,
+	                    duration: duration
+	                })
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
+
+	        //获取设备旋转状态
+
+	    }, {
+	        key: 'getOrientatioin',
+	        value: function getOrientatioin() {
+	            fetch(this.deviceUrl + '/deviceControl/getOrientation', {
+	                method: 'get'
+	            }).then(function (data) {
+	                return data.text();
+	            }).then(function (text) {
+	                var orientation = JSON.parse(text).value;
+	                return orientation;
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
+
+	        //设置设备旋转状态
+	        /**
+	         * 传入的参数可选值：
+	         * PORTRAIT
+	         * LANDSCAPE
+	         * UIA_DEVICE_ORIENTATION_LANDSCAPERIGHT
+	         * UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN 
+	        */
+
+	    }, {
+	        key: 'setOrientation',
+	        value: function setOrientation(orientation) {
+	            fetch(this.deviceUrl + '/deviceControl/setOrientation', {
+	                method: 'post',
+	                body: JSON.stringify({
+	                    orientation: orientation
+	                })
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
+
+	        //输入 
+	        /**
+	         * value为字符数组 "value":
+	         * [
+	         * "h","t","t","p",":","/","/","g","i","t","h","u","b",".","c","o","m","\\n"
+	         * ] 
+	         */
+
+	    }, {
+	        key: 'handleKeys',
+	        value: function handleKeys(value) {
+	            fetch(this.deviceUrl + '/deviceControl/keys', {
+	                method: 'post',
+	                body: JSON.stringify({
+	                    value: value
+	                })
+	            }).then(function (data) {
+	                console.log('request success');
+	                console.log(data);
+	            }).catch(function (err) {
+	                console.log('request failed');
+	                console.log(err);
+	            });
+	        }
 	    }]);
 
 	    return DeviceControl;
@@ -22608,26 +22906,6 @@
 
 /***/ },
 /* 186 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	/**
-	 * 真机相关配置文件
-	 * @author  jessica(hzgujing@corp.netease.com)
-	 */
-
-	var deviceConfig = {
-	  'url': 'http://localhost:8100'
-	};
-
-	exports.default = deviceConfig;
-
-/***/ },
-/* 187 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22649,6 +22927,26 @@
 	    }
 	    return st;
 	}
+
+/***/ },
+/* 187 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * 真机相关配置文件
+	 * @author  jessica(hzgujing@corp.netease.com)
+	 */
+
+	var deviceConfig = {
+	  'url': 'http://localhost:8100'
+	};
+
+	exports.default = deviceConfig;
 
 /***/ }
 /******/ ]);

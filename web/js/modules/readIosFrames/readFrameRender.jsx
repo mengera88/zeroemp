@@ -13,19 +13,40 @@ import { getScrollTop } from '../../util/dom.js';
 import deviceConfig from '../../config';
 
 
+const DOUBLECLICKTIME = 500;
+const LONGCLICKTIME = 500;
 let deviceURL = deviceConfig.url; //定义设备接口地址
 
 export default class ReadFrameRender extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
+
+        this.startTime = null;      // 鼠标按下时的时间
+        this.endTime = null;        // 鼠标松开时的时间
+        this.clickTime = null;      // 存储一次单击的时间
+        this.startPoint = null;     // 存储鼠标按下时的坐标
+        this.endPoint = null;       // 存储鼠标送开始的坐标
+        this.clickPoint = null;     // 存储鼠标单击时的坐标
+        this.isMoveTriggered =false;// 判断是否出发了mousemove函数
+        this.clickType = null;      // 存储鼠标行为类别
+        this.moveTime = null;       // 存储开始move的时间
+        this.orientation = null;    // 存储旋转方向信息
+
         this.deviceControl = new DeviceControl(deviceURL); 
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.stopMousing = this.stopMousing.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleDoubleClick = this.handleDoubleClick.bind(this);
+        this.handleTouchAndHold = this.handleTouchAndHold.bind(this);
+        this.handleClickType = this.handleClickType.bind(this);
+        this.handleDrag = this.handleDrag.bind(this);
+        this.setOrientation = this.setOrientation.bind(this);
+        this.returnHome = this.returnHome.bind(this);
+        this.handleKeys = this.handleKeys.bind(this); 
 
-        this.returnHome = this.returnHome.bind(this);                
     }
     
     //读取屏幕信息
@@ -67,8 +88,58 @@ export default class ReadFrameRender extends React.Component {
         this.deviceControl.returnHome();
     }
 
+    //处理keys
+    handleKeys(e) {
+        let key = [];
+        if(e.keyCode == 8) { //删除键
+            key.push('\b');
+        } else if(e.keyCode == 13) {
+            key.push('\r');
+        } else if(e.shiftKey) {
+            key.push('');
+        } else {
+            key.push(e.key);
+        }
+        this.deviceControl.handleKeys(key);
+    }
+    
+    //获取设备旋转状态
+    getOrientatioin() {
+        console.log('ffff')
+        fetch(deviceURL + '/deviceControl/getOrientation', {
+            method: 'get'
+        })
+        .then((data) => data.text())
+        .then((text) => {
+            this.orientation = JSON.parse(text).value;
+        })
+        .catch((err) => {
+            console.log('request failed')
+            console.log(err)
+        })
+    }
+
+    //设置设备旋转
+    setOrientation() {
+        let orientation;
+        console.log(this.orientation);
+        if(this.orientation == 'PORTRAIT') {
+            orientation = 'LANDSCAPE';
+            this.orientation = 'LANDSCAPE';
+        } else if(this.orientation == 'LANDSCAPE') {
+            orientation = 'PORTRAIT';
+            this.orientation = 'PORTRAIT'
+        }
+           
+        this.deviceControl.setOrientation(orientation);
+    }
+
     stopMousing() {
         let el = this.refs.screen;
+
+        this.clickType = null;
+        this.isMoveTriggered = false;
+
         el.removeEventListener('mousemove', this.onMouseMove);
         document.removeEventListener('mouseup', this.onMouseUp);
         document.removeEventListener('mouseleave', this.onMouseUp);
@@ -76,29 +147,106 @@ export default class ReadFrameRender extends React.Component {
     
     //单击事件
     onMouseDown(e) {
+        e.preventDefault();
         let el = this.refs.screen;
+        this.refs.keyinput.focus();
         let rect = el.getBoundingClientRect();
         let x = e.pageX - rect.left;
         let y = e.pageY - rect.top - getScrollTop();
-        this.deviceControl.handleMouseDown(x, y);
+        this.startTime = Date.now();
+        this.startPoint = [x, y];
         el.addEventListener('mousemove', this.onMouseMove);
         document.addEventListener('mouseup', this.onMouseUp);
         document.addEventListener('mouseleave', this.onMouseUp);
     }
 
     onMouseMove(e) {
-        console.log('mousemove ' + e)
+        e.preventDefault();
+        this.isMoveTriggered = true;
+        this.moveTime = Date.now();
     }
 
     onMouseUp(e) {
-        console.log('mouseup ' + e)
-        
+        e.preventDefault();
+        let el = this.refs.screen;
+        let rect = el.getBoundingClientRect();
+        this.endTime = Date.now();
+        let x = e.pageX - rect.left;
+        let y = e.pageY - rect.top - getScrollTop();
+        this.endPoint = [x, y];
+        let timeDis = this.endTime - this.startTime;
+        if(this.isMoveTriggered) { //为拖拽
+            this.clickType = 'drag';
+        } else if(timeDis < LONGCLICKTIME && !this.isMoveTriggered) { //则为单击
+            this.clickType = 'click';
+        } else if(timeDis > LONGCLICKTIME && !this.isMoveTriggered && this.isInRange(this.startPoint, this.endPoint, 5)) { //则为长按
+            this.clickType = 'touchandhold';
+        } 
+
+        if(this.clickType == 'click') {
+            let currentTime = Date.now();
+            if(this.clickTime 
+               && currentTime - this.clickTime <= DOUBLECLICKTIME
+               && this.isInRange(this.endPoint, this.clickPoint, 5)) {
+                console.log('doubleclick')
+                this.clickTime = null;
+               } else {
+                this.clickTime = currentTime;
+                this.clickPoint = this.endPoint;
+            }
+        }
+
+        this.handleClickType();
+        //取消事件绑定
         this.stopMousing();
         
     }
 
+    //计算距离
+    isInRange(startPoint, endPoint, threshold) {
+        let deltaX = parseFloat(endPoint[0]) - parseFloat(startPoint[0]);
+        let deltaY = parseFloat(endPoint[1]) - parseFloat(startPoint[1]);
+
+        return Math.pow(deltaX, 2) + Math.pow(deltaY, 2) <= Math.pow(threshold, 2);
+    }
+
+    //判断鼠标行为类别
+    handleClickType() {
+        switch(this.clickType) {
+            case 'click': 
+                  this.handleClick(this.startPoint[0], this.startPoint[1]); break;
+            case 'touchandhold': 
+                  this.handleTouchAndHold(this.startPoint[0], this.startPoint[1], this.endTime - this.startTime); break;
+            case 'doubleclick':
+                  this.handleDoubleClick(this.endPoint[0], this.endPoint[1]); break;
+            case 'drag':
+                  this.handleDrag(this.startPoint[0], this.startPoint[1], this.endPoint[0], this.endPoint[1], this.moveTime - this.startTime); break;
+        }
+    }
+
+    //处理单击事件
+    handleClick(x, y) {
+        this.deviceControl.handleClick(x, y);
+    }
+    
+    //长按
+    handleTouchAndHold(x, y, duration) {
+        this.deviceControl.handleTouchAndHold(x, y, duration);        
+    }
+    
+    //双击
+    handleDoubleClick(x, y) {
+        this.deviceControl.handleDoubleClick(x, y);
+    }
+
+    //拖拽
+    handleDrag(fromX, fromY, toX, toY, duration) {
+        this.deviceControl.handleDrag(fromX, fromY, toX, toY, duration);
+    }
+
     componentDidMount() {
-        this.openWebsocket()
+        this.openWebsocket();
+        this.getOrientatioin();                       
     }
 
     componentWillMount() {
@@ -114,10 +262,12 @@ export default class ReadFrameRender extends React.Component {
 
     render() {
         return (
-            <div className="g-center">
-                <canvas ref='screen' onMouseDown={this.onMouseDown}></canvas>
+            <div className="u-h700 f-tac">
+                <input className="m-input-hide" type="text" name="ddd" ref='keyinput' onKeyDown={this.handleKeys} />
+                <canvas className="f-ib" ref='screen' onMouseDown={this.onMouseDown}></canvas>
                 <div className="f-tac">
-                    <button className="u-btn-home" type='button' onClick={this.returnHome}>Home</button>
+                    <button className="u-btn-home u-mgr20" type='button' onClick={this.returnHome}>Home</button>
+                    <button className="u-btn-home" type='button' onClick={this.setOrientation}>旋转</button>
                 </div>
             </div>
         )
