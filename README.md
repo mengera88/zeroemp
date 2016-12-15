@@ -11,7 +11,7 @@
 
 ## 开发说明
 1. 进入项目根目录，先运行 `npm install`，安装依赖包
-2. 开发过程中请开启前端实时构建任务，在项目根目录运行 `gulp`;
+2. 开发过程中请开启前端实时构建任务，在项目根目录运行 `gulp`和`webpack -w`;
 3. 启动web端服务，运行命令 `npm start`
 4. 开启成功之后开启wda服务，运行`iproxy 8100 8100` 
 5. demo版本访问地址是`localhost:3000`, wda访问端口是8100
@@ -19,3 +19,5 @@
 [nodejs]: https://nodejs.org/en/
 [webpack]: http://webpack.github.io/
 [babel]: https://babeljs.io/
+[react]: https://facebook.github.io/react/
+[gulp]: http://gulpjs.com/
