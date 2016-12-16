@@ -82,7 +82,7 @@ export default class DeviceControl {
     //拖拽
     handleDrag(fromX, fromY, toX, toY, duration) {
         duration = parseFloat(duration/1000);
-        console.log(duration)
+        console.log(fromX, fromY, toX, toY, duration)
         fetch(this.deviceUrl + '/deviceControl/dragFromToForDuration', {
             method: 'post',
             body: JSON.stringify({

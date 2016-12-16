@@ -22097,6 +22097,7 @@
 	        _this.isMoveTriggered = false; // 判断是否出发了mousemove函数
 	        _this.clickType = null; // 存储鼠标行为类别
 	        _this.moveTime = null; // 存储开始move的时间
+	        _this.isMovedTimeComputed = false; //是否是第一次move
 	        _this.orientation = null; // 存储旋转方向信息
 
 	        _this.deviceControl = new _control2.default(deviceURL);
@@ -22226,6 +22227,7 @@
 
 	            this.clickType = null;
 	            this.isMoveTriggered = false;
+	            this.isMovedTimeComputed = false;
 
 	            el.removeEventListener('mousemove', this.onMouseMove);
 	            document.removeEventListener('mouseup', this.onMouseUp);
@@ -22254,7 +22256,10 @@
 	        value: function onMouseMove(e) {
 	            e.preventDefault();
 	            this.isMoveTriggered = true;
-	            this.moveTime = Date.now();
+	            if (!this.isMovedTimeComputed) {
+	                this.moveTime = Date.now();
+	                this.isMovedTimeComputed = true;
+	            }
 	        }
 	    }, {
 	        key: 'onMouseUp',
@@ -22810,7 +22815,7 @@
 	        key: 'handleDrag',
 	        value: function handleDrag(fromX, fromY, toX, toY, duration) {
 	            duration = parseFloat(duration / 1000);
-	            console.log(duration);
+	            console.log(fromX, fromY, toX, toY, duration);
 	            fetch(this.deviceUrl + '/deviceControl/dragFromToForDuration', {
 	                method: 'post',
 	                body: JSON.stringify({
