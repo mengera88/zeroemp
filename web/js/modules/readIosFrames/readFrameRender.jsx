@@ -30,6 +30,7 @@ export default class ReadFrameRender extends React.Component {
         this.isMoveTriggered =false;// 判断是否出发了mousemove函数
         this.clickType = null;      // 存储鼠标行为类别
         this.moveTime = null;       // 存储开始move的时间
+        this.isMovedTimeComputed = false;  //是否是第一次move
         this.orientation = null;    // 存储旋转方向信息
 
         this.deviceControl = new DeviceControl(deviceURL); 
@@ -139,6 +140,7 @@ export default class ReadFrameRender extends React.Component {
 
         this.clickType = null;
         this.isMoveTriggered = false;
+        this.isMovedTimeComputed = false;
 
         el.removeEventListener('mousemove', this.onMouseMove);
         document.removeEventListener('mouseup', this.onMouseUp);
@@ -163,7 +165,10 @@ export default class ReadFrameRender extends React.Component {
     onMouseMove(e) {
         e.preventDefault();
         this.isMoveTriggered = true;
-        this.moveTime = Date.now();
+        if(!this.isMovedTimeComputed) {
+            this.moveTime = Date.now();
+            this.isMovedTimeComputed = true;
+        }
     }
 
     onMouseUp(e) {
