@@ -5,7 +5,8 @@
 
 
 let deviceConfig = {
-    'url': 'http://localhost:8100'
+    'url': 'http://localhost:8100',
+    'socketUrl': 'http://localhost:8080'
 }
 
 export default deviceConfig;
