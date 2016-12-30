@@ -12,12 +12,15 @@
 ## 开发说明
 1. 进入项目根目录，先运行 `npm install`，安装依赖包
 2. 开发过程中请开启前端实时构建任务，在项目根目录运行 `gulp`和`webpack -w`;
-3. 启动web端服务，运行命令 `npm start`
-4. 开启成功之后开启wda服务，运行`iproxy 8100 8100` 
-5. demo版本访问地址是`localhost:3000`, wda访问端口是8100
+3. 项目是基于pm2管理进程的，因此需要安装[pm2]工具，运行 `sudo npm install -g pm2` 安装pm2
+4. 启动web端服务，运行命令 `pm2 start process.json`，如果要查看实时日志，运行`pm2 logs`
+5. 开启成功之后开启wda服务，运行`iproxy 8100 8100` 
+6. demo版本访问地址是`localhost:3000`, wda访问端口是8100
 
 [nodejs]: https://nodejs.org/en/
 [webpack]: http://webpack.github.io/
 [babel]: https://babeljs.io/
 [react]: https://facebook.github.io/react/
 [gulp]: http://gulpjs.com/
+[express]: http://expressjs.com/
+[pm2]: http://pm2.keymetrics.io/
