@@ -34,6 +34,9 @@
 
     self.mClient = client;
     self.mSession = [[AVCaptureSession alloc] init];
+    if ([self.mSession canSetSessionPreset:AVCaptureSessionPresetLow]) {
+        self.mSession.sessionPreset = AVCaptureSessionPresetLow;
+    }
 
     return self;
 }
@@ -234,8 +237,8 @@ void StreamClient::releaseFrame(Frame *frame) {
 void StreamClient::setResolution(uint32_t width, uint32_t height) {
     [impl->mVideoSource.mSession beginConfiguration];
     NSMutableDictionary *settings = [impl->mVideoSource.mDeviceOutput.videoSettings mutableCopy];
-    [settings setObject:[NSNumber numberWithUnsignedInt:width] forKey:(id)kCVPixelBufferWidthKey];
-    [settings setObject:[NSNumber numberWithUnsignedInt:height] forKey:(id)kCVPixelBufferHeightKey];
+    //[settings setObject:[NSNumber numberWithUnsignedInt:width] forKey:(id)kCVPixelBufferWidthKey];
+    //[settings setObject:[NSNumber numberWithUnsignedInt:height] forKey:(id)kCVPixelBufferHeightKey];
     impl->mVideoSource.mDeviceOutput.videoSettings = settings;
     [impl->mVideoSource.mSession commitConfiguration];
 }
