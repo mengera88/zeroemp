@@ -108,19 +108,11 @@ export default class ReadFrameRender extends React.Component {
     }
     
     //获取设备旋转状态
-    // getOrientatioin() {
-    //     fetch(deviceURL + '/deviceControl/getOrientation', {
-    //         method: 'get'
-    //     })
-    //     .then((data) => data.text())
-    //     .then((text) => {
-    //         this.orientation = JSON.parse(text).value;
-    //     })
-    //     .catch((err) => {
-    //         console.log('request failed')
-    //         console.log(err)
-    //     })
-    // }
+    getOrientatioin() {
+        this.socket.emit('getOrientation', (data) => {
+            this.orientation = data;
+        });
+    }
 
     //设置设备旋转
     setOrientation() {
@@ -133,7 +125,6 @@ export default class ReadFrameRender extends React.Component {
             orientation = 'PORTRAIT';
             this.orientation = 'PORTRAIT'
         }
-
         this.socket.emit('setOrientation', {orientation: orientation});
         this.socket.on('cantChange', () => {
             alert('Sorry, but this page can not change orientation!');
@@ -191,10 +182,12 @@ export default class ReadFrameRender extends React.Component {
         } else if(timeDis < LONGCLICKTIME && !this.isMoveTriggered) { //则为单击
             console.log("click")
             this.clickType = 'click';
-        } else if(timeDis > LONGCLICKTIME && !this.isMoveTriggered && this.isInRange(this.startPoint, this.endPoint, 5)) { //则为长按
+        }
+        
+        if(timeDis > LONGCLICKTIME && this.isInRange(this.startPoint, this.endPoint, 5)) {//则为长按
             console.log('touchandhold')
             this.clickType = 'touchandhold';
-        } 
+        }
 
         if(this.clickType == 'click') {
             let currentTime = Date.now();
@@ -260,7 +253,7 @@ export default class ReadFrameRender extends React.Component {
 
     componentDidMount() {
         this.openWebsocket();
-        // this.getOrientatioin();                       
+        this.getOrientatioin();                       
     }
 
     componentWillMount() {

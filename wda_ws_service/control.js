@@ -48,6 +48,10 @@ socket.on('connection', (socket) => {
         ControlInterface.setOrientation(data.orientation);
     })
 
+    socket.on('getOrientation', (callback) => {
+        ControlInterface.getOrientation().then(callback);
+    })
+
     socket.on('keydown', (data) => {
         ControlInterface.handleKeys(data.key);
     })

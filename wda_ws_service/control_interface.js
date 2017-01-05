@@ -103,14 +103,14 @@ class DeviceControl {
     }
 
     //获取设备旋转状态
-    getOrientatioin() {
-        fetch(this.deviceUrl + '/deviceControl/getOrientation', {
+    getOrientation() {
+        return fetch(this.deviceUrl + '/deviceControl/getOrientation', {
             method: 'get'
         })
         .then((data) => data.text())
         .then((text) => {
             let orientation = JSON.parse(text).value;
-            return orientation;
+            return Promise.resolve(orientation);
         })
         .catch((err) => {
             console.log('request failed')
