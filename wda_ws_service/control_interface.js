@@ -62,7 +62,7 @@ class DeviceControl {
     //长按
     handleTouchAndHold(x, y, duration) {
         duration = parseFloat(duration/1000);
-        fetch(this.deviceUrl + '/DeviceControl/touchAndHold', {
+        fetch(this.deviceUrl + '/deviceControl/touchAndHold', {
             method: 'post',
             body: JSON.stringify({
                 x: x,
