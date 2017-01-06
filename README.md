@@ -23,7 +23,7 @@
 
 ## 项目结构
 
-![项目结果图](https://git4u.hz.netease.com/hzgujing/zeroemp/tree/master/doc_imgs/ios真机调试项目架构.png)
+![项目结果图](ios真机调试项目架构.png)
 
 ### 目录结构
 ```bash
@@ -35,7 +35,6 @@
 ├── config                           #应用配置
 │   ├── build.json                   #webpack等自动化工具路径等配置
 │   └── path_config.js               #网络路径配置文件
-├── doc_imgs                         #README文档说明中用到的说明图
 ├── gulpfile.js                      #-
 ├── ios_minicap_server               #ios_minicap相关服务
 │   ├── CMakeLists.txt
@@ -73,7 +72,7 @@
 ## 部署说明
 
 ios技术架构图如下：
-![技术架构](https://git4u.hz.netease.com/hzgujing/zeroemp/tree/master/doc_imgs/iOS真机调试技术架构图.png)
+![技术架构](iOS真机调试技术架构图.png)
 
 ### 手机端
 1. 启动ios wda服务，xcode相关，具体可问ios开发相关人员
