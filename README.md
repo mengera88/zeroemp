@@ -23,7 +23,7 @@
 
 ## 项目结构
 
-![项目结果图](doc_imgs/ios真机调试项目架构.png)
+![项目结果图](https://git4u.hz.netease.com/hzgujing/zeroemp/tree/master/doc_imgs/ios真机调试项目架构.png)
 
 ### 目录结构
 ```bash
@@ -73,7 +73,7 @@
 ## 部署说明
 
 ios技术架构图如下：
-![技术架构](doc_imgs/iOS真机调试技术架构图.png)
+![技术架构](https://git4u.hz.netease.com/hzgujing/zeroemp/tree/master/doc_imgs/iOS真机调试技术架构图.png)
 
 ### 手机端
 1. 启动ios wda服务，xcode相关，具体可问ios开发相关人员
