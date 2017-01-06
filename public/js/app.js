@@ -22279,24 +22279,20 @@
 	            var timeDis = this.endTime - this.startTime;
 	            if (this.isMoveTriggered) {
 	                //为拖拽
-	                console.log('drag');
 	                this.clickType = 'drag';
 	            } else if (timeDis < LONGCLICKTIME && !this.isMoveTriggered) {
 	                //则为单击
-	                console.log("click");
 	                this.clickType = 'click';
 	            }
 
 	            if (timeDis > LONGCLICKTIME && this.isInRange(this.startPoint, this.endPoint, 5)) {
 	                //则为长按
-	                console.log('touchandhold');
 	                this.clickType = 'touchandhold';
 	            }
 
 	            if (this.clickType == 'click') {
 	                var currentTime = Date.now();
 	                if (this.clickTime && currentTime - this.clickTime <= DOUBLECLICKTIME && this.isInRange(this.endPoint, this.clickPoint, 5)) {
-	                    console.log('doubleclick');
 	                    this.clickTime = null;
 	                    this.clickType = 'doubleclick';
 	                } else {
@@ -22326,6 +22322,7 @@
 	    }, {
 	        key: 'handleClickType',
 	        value: function handleClickType() {
+	            console.log(this.clickType);
 	            switch (this.clickType) {
 	                case 'click':
 	                    this.handleClick(this.startPoint[0], this.startPoint[1]);break;
