@@ -13,7 +13,7 @@ const net = require('net')
 const WebSocketServer = require('ws').Server
 const { BannerParser, FrameParser } = require('minicap') 
 
-
+const host = require('../config/path_config').ios_minicap_service.ios_server_host;  //Web服务地址
 
 /**
  * Get port from environment and store in Express.
@@ -33,6 +33,7 @@ wss.on('connection', (ws) => {
   console.info('Got a client')
 
   const stream = net.connect({
+    host: host,
     port: 12345
   })
 

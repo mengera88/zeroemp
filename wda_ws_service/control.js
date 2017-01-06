@@ -5,9 +5,10 @@
 
 
 const controlInterface = require('./control_interface');
+const urlConfig = require('../config/path_config');
 
-const url = 'http://localhost:3000'
-const deviceUrl = 'http://localhost:8100'
+const url = urlConfig.wda_service.webUrl  //web服务器地址,设置需要跨域的地址
+const deviceUrl = urlConfig.wda_service.deviceUrl   //设备wda服务地址
 
 const app = require('http').createServer(handler).listen(8080);
 
