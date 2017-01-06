@@ -4,36 +4,38 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import io from 'socket.io-client';
 
 import RenderLoop from './renderLoop'
 import Pipeline from './pipeline'
-import DeviceControl from '../../service/control'
 import { getScrollTop } from '../../util/dom.js';
+import SocketService from '../../service/socket'
 
 import deviceConfig from '../../config';
 
 
 const DOUBLECLICKTIME = 500;
 const LONGCLICKTIME = 500;
-let deviceURL = deviceConfig.url; //定义设备接口地址
+let socketURL = deviceConfig.socketUrl; //定义socket接口地址
 
 export default class ReadFrameRender extends React.Component {
     constructor(props) {
         super(props);
 
-        this.startTime = null;      // 鼠标按下时的时间
-        this.endTime = null;        // 鼠标松开时的时间
-        this.clickTime = null;      // 存储一次单击的时间
-        this.startPoint = null;     // 存储鼠标按下时的坐标
-        this.endPoint = null;       // 存储鼠标送开始的坐标
-        this.clickPoint = null;     // 存储鼠标单击时的坐标
-        this.isMoveTriggered =false;// 判断是否出发了mousemove函数
-        this.clickType = null;      // 存储鼠标行为类别
-        this.moveTime = null;       // 存储开始move的时间
-        this.isMovedTimeComputed = false;  //是否是第一次move
-        this.orientation = null;    // 存储旋转方向信息
-
-        this.deviceControl = new DeviceControl(deviceURL); 
+        this.startTime = null;              // 鼠标按下时的时间
+        this.endTime = null;                // 鼠标松开时的时间
+        this.clickTime = null;              // 存储一次单击的时间
+        this.startPoint = null;             // 存储鼠标按下时的坐标
+        this.endPoint = null;               // 存储鼠标送开始的坐标
+        this.clickPoint = null;             // 存储鼠标单击时的坐标
+        this.isMoveTriggered =false;        // 判断是否出发了mousemove函数
+        this.clickType = null;              // 存储鼠标行为类别
+        this.moveTime = null;               // 存储开始move的时间
+        this.isMovedTimeComputed = false;   //是否是第一次move
+        this.orientation = "PORTRAIT";      // 存储旋转方向信息
+        
+        this.socket = io(socketURL, {transports: ['websocket', 'polling', 'flashsocket']});
+        
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
@@ -86,7 +88,7 @@ export default class ReadFrameRender extends React.Component {
     
     //返回home键
     returnHome() {
-        this.deviceControl.returnHome();
+        this.socket.emit('home');
     }
 
     //处理keys
@@ -101,23 +103,15 @@ export default class ReadFrameRender extends React.Component {
         } else {
             key.push(e.key);
         }
-        this.deviceControl.handleKeys(key);
+        
+        this.socket.emit('keydown', {key: key});
     }
     
     //获取设备旋转状态
     getOrientatioin() {
-        console.log('ffff')
-        fetch(deviceURL + '/deviceControl/getOrientation', {
-            method: 'get'
-        })
-        .then((data) => data.text())
-        .then((text) => {
-            this.orientation = JSON.parse(text).value;
-        })
-        .catch((err) => {
-            console.log('request failed')
-            console.log(err)
-        })
+        this.socket.emit('getOrientation', (data) => {
+            this.orientation = data;
+        });
     }
 
     //设置设备旋转
@@ -131,8 +125,10 @@ export default class ReadFrameRender extends React.Component {
             orientation = 'PORTRAIT';
             this.orientation = 'PORTRAIT'
         }
-           
-        this.deviceControl.setOrientation(orientation);
+        this.socket.emit('setOrientation', {orientation: orientation});
+        this.socket.on('cantChange', () => {
+            alert('Sorry, but this page can not change orientation!');
+        })
     }
 
     stopMousing() {
@@ -184,23 +180,25 @@ export default class ReadFrameRender extends React.Component {
             this.clickType = 'drag';
         } else if(timeDis < LONGCLICKTIME && !this.isMoveTriggered) { //则为单击
             this.clickType = 'click';
-        } else if(timeDis > LONGCLICKTIME && !this.isMoveTriggered && this.isInRange(this.startPoint, this.endPoint, 5)) { //则为长按
+        }
+        
+        if(timeDis > LONGCLICKTIME && this.isInRange(this.startPoint, this.endPoint, 5)) {//则为长按
             this.clickType = 'touchandhold';
-        } 
+        }
 
         if(this.clickType == 'click') {
             let currentTime = Date.now();
             if(this.clickTime 
                && currentTime - this.clickTime <= DOUBLECLICKTIME
                && this.isInRange(this.endPoint, this.clickPoint, 5)) {
-                console.log('doubleclick')
                 this.clickTime = null;
+                this.clickType = 'doubleclick';
                } else {
                 this.clickTime = currentTime;
                 this.clickPoint = this.endPoint;
             }
         }
-
+        
         this.handleClickType();
         //取消事件绑定
         this.stopMousing();
@@ -217,6 +215,7 @@ export default class ReadFrameRender extends React.Component {
 
     //判断鼠标行为类别
     handleClickType() {
+        console.log(this.clickType);
         switch(this.clickType) {
             case 'click': 
                   this.handleClick(this.startPoint[0], this.startPoint[1]); break;
@@ -225,28 +224,28 @@ export default class ReadFrameRender extends React.Component {
             case 'doubleclick':
                   this.handleDoubleClick(this.endPoint[0], this.endPoint[1]); break;
             case 'drag':
-                  this.handleDrag(this.startPoint[0], this.startPoint[1], this.endPoint[0], this.endPoint[1], this.moveTime - this.startTime); break;
+                  this.handleDrag(this.startPoint[0], this.startPoint[1], this.endPoint[0], this.endPoint[1], this.moveTime - this.startTime, this.endTime - this.moveTime); break;
         }
     }
 
     //处理单击事件
     handleClick(x, y) {
-        this.deviceControl.handleClick(x, y);
+        this.socket.emit('click', {x: x, y: y});
     }
     
     //长按
     handleTouchAndHold(x, y, duration) {
-        this.deviceControl.handleTouchAndHold(x, y, duration);        
+        this.socket.emit('touchandhold', {x: x, y: y, duration: duration});
     }
     
     //双击
     handleDoubleClick(x, y) {
-        this.deviceControl.handleDoubleClick(x, y);
+        this.socket.emit('dbClick', {x: x, y: y});
     }
 
     //拖拽
-    handleDrag(fromX, fromY, toX, toY, duration) {
-        this.deviceControl.handleDrag(fromX, fromY, toX, toY, duration);
+    handleDrag(fromX, fromY, toX, toY, pressDuration, dragDuration) {
+        this.socket.emit('drag', {fromX: fromX, fromY: fromY, toX: toX, toY: toY, pressDuration: pressDuration, dragDuration: dragDuration});
     }
 
     componentDidMount() {

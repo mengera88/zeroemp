@@ -3,7 +3,6 @@
 /**
  * Module dependencies.
  */
-const iosMinicapServer = require('../ios_minicap_server/ios_minicap_server.js');
 
 const app = require('../app');
 const debug = require('debug')('zeroemp:server');
@@ -14,8 +13,7 @@ const net = require('net')
 const WebSocketServer = require('ws').Server
 const { BannerParser, FrameParser } = require('minicap') 
 
-
-const runIosServer = new iosMinicapServer();
+const host = require('../config/path_config').ios_minicap_service.ios_server_host;  //Web服务地址
 
 /**
  * Get port from environment and store in Express.
@@ -35,13 +33,13 @@ wss.on('connection', (ws) => {
   console.info('Got a client')
 
   const stream = net.connect({
+    host: host,
     port: 12345
   })
 
   stream.on('error', (err) => {
     console.error(err)
     console.error('Be sure to run `ios-minicap --port 12345`')
-    runIosServer.destroy()
     process.exit(1)
   })
 
@@ -86,7 +84,6 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     console.info('Lost a client')
     stream.destroy()
-    runIosServer.destroy()
   })
 })
 
@@ -131,8 +128,6 @@ function onError(error) {
     ? 'Pipe ' + port
     : 'Port ' + port;
   
-  runIosServer.destroy()
-
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':

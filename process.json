@@ -1,0 +1,20 @@
+{
+    "apps": [
+        {
+            "name": "unit-ios-minicap",
+            "script": "./ios_minicap_server/run.sh",
+            "interpreter": "/bin/bash",
+            "cwd": "./ios_minicap_server"
+        },
+        {
+            "name": "unit-web",
+            "script": "./bin/www"
+        },
+        {
+            "name": "unit-wda-ws-service",
+            "script": "./wda_ws_service/control.js",
+            "cwd": "./wda_ws_service",
+            "watch": true
+        }
+    ]
+}
