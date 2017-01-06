@@ -18,6 +18,8 @@
 6. 开启成功之后开启wda服务，运行`iproxy 8100 8100`
 7. demo版本访问地址是`localhost:3000`, wda访问端口是8100
 8. 杀掉pm2所有进程，可以运行 `pm2 kill`
+9. 单独跑`wda_ws_service`服务，可以运行命令`pm2 start process.json --only unit-wda-ws-service`
+10. 单独跑`ios_minicap_server`服务， 可以运行命令`pm2 start process.json --only unit-ios-minicap`
 
 [nodejs]: https://nodejs.org/en/
 [webpack]: http://webpack.github.io/
