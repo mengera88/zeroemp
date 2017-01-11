@@ -22111,6 +22111,9 @@
 	        _this.orientation = "PORTRAIT"; // 存储旋转方向信息
 
 	        _this.socket = (0, _socket2.default)(socketURL, { transports: ['websocket', 'polling', 'flashsocket'] });
+	        _this.socket.on('cantChange', function () {
+	            alert('Sorry, but this page can not change orientation!');
+	        });
 
 	        _this.onMouseDown = _this.onMouseDown.bind(_this);
 	        _this.onMouseMove = _this.onMouseMove.bind(_this);
@@ -22221,9 +22224,6 @@
 	                this.orientation = 'PORTRAIT';
 	            }
 	            this.socket.emit('setOrientation', { orientation: orientation });
-	            this.socket.on('cantChange', function () {
-	                alert('Sorry, but this page can not change orientation!');
-	            });
 	        }
 	    }, {
 	        key: 'stopMousing',
@@ -33236,18 +33236,20 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	    value: true
+	  value: true
 	});
 	/**
-	 * 真机相关配置文件
+	 * 真机web端前端相关配置文件,web页面访问的相关配置
+	 * url——web页面后端需要访问的设备地址
+	 * socketUrl——web页面前端访问后端wda_ws服务的url地址
 	 * @author  jessica(hzgujing@corp.netease.com)
 	 */
 
 	var deviceConfig = {
-	    // 'url': 'http://10.240.252.202:8100',       //设备url地址
-	    // 'socketUrl': 'http://10.240.252.202:8080'  //wda_ws服务的url地址
-	    'url': 'http://localhost:8100', //设备url地址
-	    'socketUrl': 'http://localhost:8080' //wda_ws服务的url地址
+	  // 'url': 'http://10.240.252.202:8100',       //设备url地址
+	  // 'socketUrl': 'http://10.240.252.202:8080'  //wda_ws服务的url地址
+	  'url': 'http://localhost:8100', //设备url地址
+	  'socketUrl': 'http://localhost:8080' //wda_ws服务的url地址
 	};
 
 	exports.default = deviceConfig;
