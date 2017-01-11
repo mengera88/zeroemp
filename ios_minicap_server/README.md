@@ -1,3 +1,10 @@
+# 说明
+
+- 1.src目录为源文件目录
+- 2.运行`./build.sh`之后,生成build目录,包含ios_minicap文件
+- 3.运行`./open_xcode.sh`后生成xcode目录,可打开其中的`ios_minicap.xcodeproj`文件编辑源码
+- 4.启动脚本为`./run.sh`
+
 # ios-minicap
 
 iOS Minicap provides a socket interface for streaming realtime screen capture data out of iOS devices. It is built with AVFoundation and iOS Screen mirroring feature.

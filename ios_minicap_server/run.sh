@@ -7,9 +7,7 @@ echo $UDID
 PORT=12345
 
 #获取PRODUCTTYPE
-DEVICEINFO=$(ideviceinfo)
-DEVICEINFO=${DEVICEINFO##*ProductType:}
-PRODUCTTYPE=${DEVICEINFO%%ProductVersion*}
+PRODUCTTYPE=$(ideviceinfo -k ProductType)
 if [[ ! -n "$PRODUCTTYPE" ]]; then
 exit 1
 fi
