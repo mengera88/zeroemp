@@ -11,7 +11,7 @@
 ## 开发说明
 1. 进入项目根目录，先运行 `npm install`，安装依赖包
 2. 进入`ios_minicap_server`目录`cd ios_minicap_server`，运行`./build.sh`编译ios-minicap可执行文件
-3. 开发过程中请开启前端实时构建任务，在项目根目录运行 `gulp`和`webpack -w`;
+3. 开发过程中请开启前端实时构建任务，在项目根目录运行 `gulp`和`webpack -w`,初次运行，需要运行这条命令`gulp buildLess`;
 4. 项目是基于pm2管理进程的，因此需要安装[pm2]工具，运行 `sudo npm install -g pm2` 安装pm2
 5. 启动web端服务，运行命令 `pm2 start process.json`，如果要查看实时日志，运行`pm2 logs`，可以直接运行`pm2 start process.json && pm2 logs`使得在起服务之后立即打印日志信息
 6. 开启成功之后开启wda服务（xcode中的项目），然后运行`iproxy 8100 8100`

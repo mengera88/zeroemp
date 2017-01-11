@@ -7,12 +7,12 @@
 
 const urlConfig = {
     wda_service: {
-        webUrl: "http://localhost:3000",
-        deviceUrl: "http://localhost:8100"
+        webUrl: "http://localhost:3000",    //云主机的网络地址
+        deviceUrl: "http://localhost:8100"  //mac mini服务器的地址，端口为访问设备的端口
     },
     ios_minicap_service: {
         // ios_server_host: "10.240.252.202"  //链接ios_minicap服务的host信息
-        ios_server_host: "localhost"  //链接ios_minicap服务的host信息
+        ios_server_host: "localhost"  //链接ios_minicap服务的host地址
     }
 }
 
