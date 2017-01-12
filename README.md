@@ -89,7 +89,7 @@ ios技术架构图如下：
 1. 从[git]仓库下载项目。
 2. 进入项目根目录，运行 `npm install`，安装依赖包
 3. 如果有需要，修改配置文件：`web\js\config.js` 、`config`目录下的`path_config.js`，文件中会有相关的注释说明
-4. 运行webpack编译前端相关文件
+4. 运行`webpack`打包前端相关文件,运行`gulp buildLess`编译相关css文件
 5. 启动web服务： `pm2 start process.json --only unit-web`,如果有需要，可以修改相关的配置文件,具体在项目结构中有说明
 
 
