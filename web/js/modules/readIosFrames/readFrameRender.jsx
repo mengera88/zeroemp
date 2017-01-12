@@ -119,13 +119,11 @@ export default class ReadFrameRender extends React.Component {
 
     //设置设备旋转
     setOrientation() {
-        let orientation;
+        let orientation = this.orientation;
         if(this.orientation == 'PORTRAIT') {
             orientation = 'LANDSCAPE';
         } else if(this.orientation == 'LANDSCAPE') {
             orientation = 'PORTRAIT';
-        } else {
-            orientation = 'LANDSCAPE';
         }
         this.socket.emit('setOrientation', {orientation: orientation}, (data) => {
             console.log(data)

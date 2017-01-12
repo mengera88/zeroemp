@@ -93,6 +93,41 @@ ios技术架构图如下：
 5. 启动web服务： `pm2 start process.json --only unit-web`,如果有需要，可以修改相关的配置文件,具体在项目结构中有说明
 
 
+## 配置信息说明
+配置文件有两个部分，其中一个是config目录下的path_config.js,一个是web/js目录下的config.js。
+config.js文件主要配置web端前端服务相关的文件,目前的示例（后期如果有扩展，需要更新此处）
+```javascript
+let deviceConfig = {
+    'url': 'http://localhost:8100',       //mac mini服务器地址，端口号为访问设备信息的端口
+    'socketUrl': 'http://localhost:8080'  //wda_ws服务的url地址，即mac mini服务器地址
+}
+```
+若后期mac mini连接多台设备，则此处的url需要修改成可配置，可以通过配置多个端口号，达成多台设备的目的。
+
+
+path_config.js是web端后端相关的配置文件
+```javascript
+/**
+ * 真机调试web端后端相关配置文件
+ * wda_service —— 后端封装的wda_service服务的地址，该服务配置在mac mini上，因此需要填写mac mini的网络地址
+ * sockios_minicap_serviceetUrl —— web页面后端访问ios minicap服务的host地址信息，ios minicap服务配置在mac mini上，因此需要填写那里的地址
+ * @author  jessica(hzgujing@corp.netease.com)
+ */
+
+const urlConfig = {
+    wda_service: {
+        webUrl: "http://localhost:3000",    //云主机的网络地址
+        deviceUrl: "http://localhost:8100"  //mac mini服务器的地址，端口为访问设备的端口
+    },
+    ios_minicap_service: {
+        ios_server_host: "localhost"  //链接ios_minicap服务的host地址
+    }
+}
+```
+
+
+
+
 [nodejs]: https://nodejs.org/en/
 [webpack]: http://webpack.github.io/
 [babel]: https://babeljs.io/
