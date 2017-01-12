@@ -45,8 +45,8 @@ socket.on('connection', (socket) => {
         ControlInterface.handleDrag(data.fromX, data.fromY, data.toX, data.toY, data.pressDuration, data.dragDuration);
     })
 
-    socket.on('setOrientation', (data) => {
-        ControlInterface.setOrientation(data.orientation);
+    socket.on('setOrientation', (data, callback) => {
+        ControlInterface.setOrientation(data.orientation).then(callback);
     })
 
     socket.on('getOrientation', (callback) => {

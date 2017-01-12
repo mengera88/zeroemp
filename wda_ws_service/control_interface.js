@@ -127,7 +127,7 @@ class DeviceControl {
      * UIA_DEVICE_ORIENTATION_PORTRAIT_UPSIDEDOWN 
     */
     setOrientation(orientation) {
-        fetch(this.deviceUrl + '/deviceControl/setOrientation', {
+        return fetch(this.deviceUrl + '/deviceControl/setOrientation', {
             method: 'post',
             body: JSON.stringify({
                 orientation: orientation
@@ -135,13 +135,14 @@ class DeviceControl {
         })
         .then((data) => data.text())
         .then((text) => {
-            console.log(text)
             let status = JSON.parse(text).status;
-            console.log(status)
+            let orientation = JSON.parse(text).value;
+            console.log(text, orientation)
             if(status == 777) {
                 console.log('cantChange')
                 this.socket.emit('cantChange');
             }
+            return Promise.resolve(orientation);
         })
         .catch((err) => {
             console.log('request failed')

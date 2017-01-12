@@ -35,6 +35,7 @@ export default class ReadFrameRender extends React.Component {
         this.orientation = "PORTRAIT";      // 存储旋转方向信息
         
         this.socket = io(socketURL, {transports: ['websocket', 'polling', 'flashsocket']});
+
         this.socket.on('cantChange', () => {
             alert('Sorry, but this page can not change orientation!');
         })
@@ -119,18 +120,17 @@ export default class ReadFrameRender extends React.Component {
     //设置设备旋转
     setOrientation() {
         let orientation;
-        console.log(this.orientation);
         if(this.orientation == 'PORTRAIT') {
             orientation = 'LANDSCAPE';
-            this.orientation = 'LANDSCAPE';
         } else if(this.orientation == 'LANDSCAPE') {
             orientation = 'PORTRAIT';
-            this.orientation = 'PORTRAIT'
         } else {
             orientation = 'LANDSCAPE';
-            this.orientation = 'LANDSCAPE';
         }
-        this.socket.emit('setOrientation', {orientation: orientation});
+        this.socket.emit('setOrientation', {orientation: orientation}, (data) => {
+            console.log(data)
+            this.orientation = data;
+        });
     }
 
     stopMousing() {
