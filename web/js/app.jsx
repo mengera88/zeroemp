@@ -1,6 +1,6 @@
 /**
  * App Entry 应用程序入口
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 
 // To add to window

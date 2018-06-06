@@ -1,7 +1,7 @@
 /**
  * BackFrame stores the latest frame retrieved from the socket.
  * It does no other work and can be swapped at any time.
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 
 export default class BackFrame {

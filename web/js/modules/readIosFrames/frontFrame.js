@@ -3,7 +3,7 @@
  * There are two FrontFrames. One is always loading the next image and one
  * is always being used to render the latest fully loaded image. They're
  * swapped once loading completes and the process repeats.
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 export default class FrontFrame {
     constructor(name) {

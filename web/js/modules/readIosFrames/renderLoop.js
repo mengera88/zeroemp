@@ -1,6 +1,6 @@
 /**
  * RenderLoop consumes and renders the pipeline.
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 export default class RenderLoop {
     constructor(pipeline, canvas) {

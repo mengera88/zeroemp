@@ -1,7 +1,7 @@
 /**
  * Utilities
  * @module  utils
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 
 'use strict';

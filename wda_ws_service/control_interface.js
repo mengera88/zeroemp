@@ -1,6 +1,6 @@
 /**
  * 控制真机接口服务工具，提供给wda_service服务调用
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 
 const fetch = require('node-fetch');

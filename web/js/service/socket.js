@@ -1,6 +1,6 @@
 /**
  * SocketService 真机控制Socket服务
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 
 import { remove } from '../util';

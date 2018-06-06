@@ -1,6 +1,6 @@
 /**
  * Webpack打包配置
- * @author  jessica(hzgujing@corp.netease.com)
+ * @author  jessica(gujing_hy@163.com)
  */
 
 const path = require('path');
